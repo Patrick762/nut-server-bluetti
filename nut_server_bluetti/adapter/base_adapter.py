@@ -1,11 +1,12 @@
 from dataclasses import dataclass
+from enum import Enum
 
 
 @dataclass
 class NutVariable:
     name: str
-    value: str
-    vType: str
+    value: str | int | float | Enum
+    vType: str | None = None
 
 
 class BaseAdapter:
@@ -18,3 +19,6 @@ class BaseAdapter:
 
     def numlogins(self) -> int:
         raise NotImplementedError()
+
+    def get_values(self) -> dict[str, NutVariable]:
+        return {}

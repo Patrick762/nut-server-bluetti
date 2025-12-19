@@ -16,4 +16,4 @@ class TestNutServer(unittest.TestCase):
 
         variables = server._build_var_list()
 
-        self.assertIn("VAR name device.mfr Manufacturer", variables)
+        self.assertIn('VAR name device.mfr "Manufacturer"', variables)

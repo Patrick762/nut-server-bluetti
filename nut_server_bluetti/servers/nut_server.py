@@ -1,6 +1,7 @@
 """Base nut server."""
 
 import asyncio
+from enum import Enum
 
 from ..adapter import BaseAdapter
 from .errors import NutError, build_nut_error
@@ -44,8 +45,6 @@ class NutServer:
         writer.close()
 
     def _handle_command(self, command: str) -> str:
-        error_response = "ERROR"
-
         regexed = NUT_COMMANDS_RE.match(command)
 
         cw = regexed.group("cw")
@@ -53,7 +52,7 @@ class NutServer:
         args = regexed.group("a")
 
         if (cw is None and ca is None) or (ca is not None and args is None):
-            return error_response
+            return build_nut_error(NutError.UnknownCommand)
 
         if cw is not None:
             parsed = NutCommand(cw)
@@ -70,45 +69,12 @@ class NutServer:
                 return self._get_var(args)
             case NutCommand.GetType:
                 return self._get_type(args)
-
-            # Get desc
-            # Get cmddesc
-            # Get tracking
-
             case NutCommand.ListUps:
                 return self._list_ups()
             case NutCommand.ListVar:
                 return self._list_var(args)
 
-            # List rw
-            # List cmd
-            # List enum
-            # List range
-            # List client
-
-            # Set var
-            # Set tracking
-
-            # Instcmd
-
-            # Logout
-            # Login
-
-            # Primary
-
-            # FSD
-
-            # Password
-
-            # Username
-
-            # StartTls
-
-            # Help
-            # Ver
-            # Netver
-
-        return error_response
+        return build_nut_error(NutError.FeatureNotSupported)
 
     def _get_numlogins(self, args: str) -> str:
         if args != self.adapter.name:
@@ -139,11 +105,19 @@ class NutServer:
         if splitted[0] != self.adapter.name:
             return build_nut_error(NutError.UnknownUps)
 
-        if splitted[1] in self.adapter.static_vars.keys():
-            return f'VAR {self.adapter.name} {splitted[1]} "{self.adapter.static_vars[splitted[1]].value}"'
+        value = None
 
-        # TODO Get from dynamic
-        return build_nut_error(NutError.VarNotSupported)
+        if splitted[1] in self.adapter.static_vars.keys():
+            value = self.adapter.static_vars[splitted[1]].value
+
+        dynamic = self.adapter.get_values()
+        if splitted[1] in dynamic.keys():
+            value = dynamic[splitted[1]].value
+
+        if value is None:
+            return build_nut_error(NutError.VarNotSupported)
+
+        return f'VAR {self.adapter.name} {splitted[1]} "{value}"'
 
     def _get_type(self, args: str) -> str:
         splitted = args.split(" ")
@@ -154,11 +128,31 @@ class NutServer:
         if splitted[0] != self.adapter.name:
             return build_nut_error(NutError.UnknownUps)
 
-        if splitted[1] in self.adapter.static_vars.keys():
-            return f'VAR {self.adapter.name} {splitted[1]} "{self.adapter.static_vars[splitted[1]].vType}"'
+        value = None
+        vType = None
 
-        # TODO Get from dynamic
-        return build_nut_error(NutError.VarNotSupported)
+        if splitted[1] in self.adapter.static_vars.keys():
+            value = self.adapter.static_vars[splitted[1]].value
+            vType = self.adapter.static_vars[splitted[1]].vType
+
+        dynamic = self.adapter.get_values()
+        if splitted[1] in dynamic.keys():
+            value = dynamic[splitted[1]].value
+            vType = dynamic[splitted[1]].vType
+
+        if value is None:
+            return build_nut_error(NutError.VarNotSupported)
+
+        # detect var type if not set
+        if vType is None:
+            if isinstance(value, str):
+                vType = "STRING:30"
+            if isinstance(value, int) or isinstance(value, float):
+                vType = "NUMBER"
+            if isinstance(value, Enum):
+                vType = "ENUM"
+
+        return f'VAR {self.adapter.name} {splitted[1]} "{vType}"'
 
     def _list_ups(self) -> str:
         return "\n".join(
@@ -170,9 +164,12 @@ class NutServer:
         )
 
     def _build_var_list(self) -> list[str]:
+        variables = self.adapter.static_vars
+        variables.update(self.adapter.get_values())
+
         return [
-            f"VAR {self.adapter.name} {key} {value.value}"
-            for [key, value] in self.adapter.static_vars.items()
+            f'VAR {self.adapter.name} {key} "{value.value}"'
+            for [key, value] in variables.items()
         ]
 
     def _list_var(self, args: str) -> str:

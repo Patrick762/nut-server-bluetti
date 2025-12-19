@@ -1,3 +1,4 @@
+import random
 from . import BaseAdapter, NutVariable
 
 
@@ -7,10 +8,16 @@ class DummyAdapter(BaseAdapter):
             "name",
             "Description",
             {
-                "device.mfr": NutVariable("device.mfr", "Manufacturer", "STRING:12"),
-                "device.model": NutVariable("device.model", "Model", "STRING:5"),
+                "device.mfr": NutVariable("device.mfr", "Manufacturer"),
+                "device.model": NutVariable("device.model", "Model"),
             },
         )
 
     def numlogins(self) -> int:
         return 0
+
+    def get_values(self) -> dict[str, NutVariable]:
+        return {
+            "battery.charge": NutVariable("battery.charge", random.randint(50, 100)),
+            "output.voltage": NutVariable("output.voltage", random.randint(1, 999)),
+        }
