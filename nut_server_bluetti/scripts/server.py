@@ -1,11 +1,13 @@
 import asyncio
 import logging
 
+from ..adapter.dummy_adapter import DummyAdapter
 from ..servers.nut_server import NutServer
 
 
 async def start_async():
-    server = NutServer()
+    adapter = DummyAdapter()
+    server = NutServer(adapter)
     await server.start()
 
 
