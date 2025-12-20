@@ -1,10 +1,10 @@
 """Base nut server."""
 
 import asyncio
-from enum import Enum
+
+from nut_definitions import NUT_COMMANDS_RE, NutCommand, NutError, build_nut_error
 
 from ..adapter import BaseAdapter
-from ..definitions import NUT_COMMANDS_RE, NutCommand, NutError, build_nut_error
 from .exceptions import DisconnectRequestedException
 
 

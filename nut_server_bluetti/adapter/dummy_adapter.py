@@ -1,7 +1,8 @@
 import random
 
+from nut_definitions import NutVariable, DeviceType, UpsStatus
+
 from . import BaseAdapter
-from ..definitions import NutVariable, DeviceType, UpsStatus
 
 
 class DummyAdapter(BaseAdapter):

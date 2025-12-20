@@ -25,7 +25,7 @@ setup(
     packages=find_packages(),
     install_requires=[
         "asyncio",
-        # TODO
+        "nut-definitions",
     ],
     keywords=[],
     entry_points={

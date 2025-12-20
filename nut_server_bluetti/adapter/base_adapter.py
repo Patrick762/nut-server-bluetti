@@ -1,4 +1,4 @@
-from ..definitions import NutVariable
+from nut_definitions import NutVariable
 
 
 class BaseAdapter:
