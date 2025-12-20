@@ -1,6 +1,6 @@
 import unittest
 
-from nut_server_bluetti.servers.nut_commands import NUT_COMMANDS_RE
+from nut_server_bluetti.definitions import NUT_COMMANDS_RE
 
 
 class TestCommandParser(unittest.TestCase):

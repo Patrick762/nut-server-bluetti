@@ -1,5 +1,7 @@
 import random
-from . import BaseAdapter, NutVariable
+
+from . import BaseAdapter
+from ..definitions import NutVariable, DeviceType, UpsStatus
 
 
 class DummyAdapter(BaseAdapter):
@@ -7,17 +9,18 @@ class DummyAdapter(BaseAdapter):
         super().__init__(
             "name",
             "Description",
-            {
-                "device.mfr": NutVariable("device.mfr", "Manufacturer"),
-                "device.model": NutVariable("device.model", "Model"),
-            },
+            [
+                NutVariable.device_mfr("Manufacturer"),
+                NutVariable.device_model("Model"),
+                NutVariable.device_type(DeviceType.Ups),
+            ],
         )
 
     def numlogins(self) -> int:
         return 0
 
-    def get_values(self) -> dict[str, NutVariable]:
-        return {
-            "battery.charge": NutVariable("battery.charge", random.randint(50, 100)),
-            "output.voltage": NutVariable("output.voltage", random.randint(1, 999)),
-        }
+    def _get_values(self) -> list[NutVariable]:
+        return [
+            NutVariable.ups_status([UpsStatus.Online]),
+            NutVariable.battery_charge(random.randint(50, 100)),
+        ]

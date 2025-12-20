@@ -1,3 +1,8 @@
+"""
+Possible NUT Commands as specified in
+https://networkupstools.org/docs/developer-guide.chunked/net-protocol.html
+"""
+
 import re
 
 from enum import Enum

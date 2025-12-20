@@ -4,8 +4,8 @@ import asyncio
 from enum import Enum
 
 from ..adapter import BaseAdapter
-from .errors import NutError, build_nut_error
-from .nut_commands import NUT_COMMANDS_RE, NutCommand
+from ..definitions import NUT_COMMANDS_RE, NutCommand, NutError, build_nut_error
+from .exceptions import DisconnectRequestedException
 
 
 class NutServer:
@@ -37,7 +37,9 @@ class NutServer:
                 result = self._handle_command(data)
                 print(f"<- {repr(result)}")
                 writer.write(f"{result}\n".encode())
-                writer.write_eof()
+            except DisconnectRequestedException:
+                print("Client disconnected")
+                break
             except:
                 print("Error")
                 break
@@ -73,6 +75,8 @@ class NutServer:
                 return self._list_ups()
             case NutCommand.ListVar:
                 return self._list_var(args)
+            case NutCommand.Logout:
+                raise DisconnectRequestedException()
 
         return build_nut_error(NutError.FeatureNotSupported)
 
@@ -105,14 +109,7 @@ class NutServer:
         if splitted[0] != self.adapter.name:
             return build_nut_error(NutError.UnknownUps)
 
-        value = None
-
-        if splitted[1] in self.adapter.static_vars.keys():
-            value = self.adapter.static_vars[splitted[1]].value
-
-        dynamic = self.adapter.get_values()
-        if splitted[1] in dynamic.keys():
-            value = dynamic[splitted[1]].value
+        value = self.adapter.get_variable_value(splitted[1])
 
         if value is None:
             return build_nut_error(NutError.VarNotSupported)
@@ -128,29 +125,11 @@ class NutServer:
         if splitted[0] != self.adapter.name:
             return build_nut_error(NutError.UnknownUps)
 
-        value = None
-        vType = None
+        value = self.adapter.get_variable_value(splitted[1])
+        vType = self.adapter.get_variable_type(splitted[1])
 
-        if splitted[1] in self.adapter.static_vars.keys():
-            value = self.adapter.static_vars[splitted[1]].value
-            vType = self.adapter.static_vars[splitted[1]].vType
-
-        dynamic = self.adapter.get_values()
-        if splitted[1] in dynamic.keys():
-            value = dynamic[splitted[1]].value
-            vType = dynamic[splitted[1]].vType
-
-        if value is None:
+        if value is None or vType is None:
             return build_nut_error(NutError.VarNotSupported)
-
-        # detect var type if not set
-        if vType is None:
-            if isinstance(value, str):
-                vType = "STRING:30"
-            if isinstance(value, int) or isinstance(value, float):
-                vType = "NUMBER"
-            if isinstance(value, Enum):
-                vType = "ENUM"
 
         return f'VAR {self.adapter.name} {splitted[1]} "{vType}"'
 
@@ -164,13 +143,9 @@ class NutServer:
         )
 
     def _build_var_list(self) -> list[str]:
-        variables = self.adapter.static_vars
-        variables.update(self.adapter.get_values())
+        variables = self.adapter.get_all_variables()
 
-        return [
-            f'VAR {self.adapter.name} {key} "{value.value}"'
-            for [key, value] in variables.items()
-        ]
+        return [f'VAR {self.adapter.name} {v.name} "{v.value}"' for v in variables]
 
     def _list_var(self, args: str) -> str:
         if args != self.adapter.name:

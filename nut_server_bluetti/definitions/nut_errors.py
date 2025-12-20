@@ -1,3 +1,8 @@
+"""
+Possible NUT Errors as specified in
+https://networkupstools.org/docs/developer-guide.chunked/net-protocol.html#10-16-error-responses
+"""
+
 from enum import Enum
 
 
