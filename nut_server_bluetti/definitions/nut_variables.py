@@ -297,9 +297,13 @@ class NutVariable:
 
     # region input
 
+    # TODO
+
     # endregion
 
     # region output
+
+    # TODO
 
     # endregion
 
@@ -309,5 +313,7 @@ class NutVariable:
     def battery_charge(value: float):
         """Battery charge (percent)"""
         return NutVariable("battery.charge", value)
+
+    # TODO
 
     # endregion
