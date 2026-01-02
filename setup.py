@@ -9,7 +9,7 @@ here = os.path.abspath(os.path.dirname(__file__))
 with codecs.open(os.path.join(here, "README.md"), encoding="utf-8") as fh:
     long_description = "\n" + fh.read()
 
-VERSION = "0.0.1"
+VERSION = os.getenv("LIB_VERSION")
 DESCRIPTION = "NUT Server Bluetti"
 
 # Setting up
@@ -25,12 +25,14 @@ setup(
     packages=find_packages(),
     install_requires=[
         "asyncio",
-        "nut-definitions",
+        "nut-definitions==0.0.2",
+        "nut-base-server",
+        "bluetti-bt-lib==0.1.5b1",
     ],
     keywords=[],
     entry_points={
         "console_scripts": [
-            "bluetti-nut = nut_server_bluetti.scripts.server:start",
+            "bluetti-nut = nut_server_bluetti.server:start",
         ],
     },
     classifiers=[

@@ -1,2 +1,4 @@
 asyncio
-nut-definitions
+nut-definitions==0.0.2
+nut-base-server
+bluetti-bt-lib==0.1.5b1
