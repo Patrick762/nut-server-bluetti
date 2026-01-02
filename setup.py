@@ -26,7 +26,7 @@ setup(
     install_requires=[
         "asyncio",
         "nut-definitions==0.0.2",
-        "nut-base-server",
+        "nut-base-server==0.0.1",
         "bluetti-bt-lib==0.1.5b1",
     ],
     keywords=[],

@@ -16,6 +16,7 @@ REQUIRED_FIELDS = [
     FieldName.AC_OUTPUT_POWER.value,
 ]
 
+
 def is_supported(t: str) -> bool:
     device = build_device(t + "123456789")
     if device is None:
@@ -45,14 +46,17 @@ def start():
         "-e", "--encryption", type=bool, help="Add this if encryption is needed"
     )
     parser.add_argument(
-        "-i", "--interval", type=int, help="Set the polling interval in seconds. Defaults to 20"
+        "-i",
+        "--interval",
+        type=int,
+        help="Set the polling interval in seconds. Defaults to 20",
     )
     args = parser.parse_args()
 
     if args.mac is None or args.type is None:
         parser.print_help()
         return
-    
+
     if not is_supported(args.type):
         print("This powerstation is not supported (missing fields)")
         return

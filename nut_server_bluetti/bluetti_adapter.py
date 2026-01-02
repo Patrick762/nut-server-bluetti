@@ -40,7 +40,13 @@ class BluettiAdapter(BaseAdapter):
 
         self.lock.release()
 
-        if model is None or soc is None or vin is None or pwr_in is None or pwr_out is None:
+        if (
+            model is None
+            or soc is None
+            or vin is None
+            or pwr_in is None
+            or pwr_out is None
+        ):
             return []
 
         ups_status = []
